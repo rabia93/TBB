@@ -46,7 +46,6 @@ public JList<PlayerCommand> commandList = new JList<>();
 private DefaultListModel<PlayerCommand> listModel = new DefaultListModel<>();
 int index=-1;
 private GUI gui;
-private boolean isEdit = false;
 int selectedIndex;
 
 ColourMapper map= new ColourMapper();
@@ -137,12 +136,9 @@ private void swapElements(int a, int b) {
  *            New element to be added
  */
 public void addItem(PlayerCommand newElement) {
-	if(isEdit==true)
-	listModel.setElementAt(newElement, this.selectedIndex);
+
+	listModel.addElement(newElement);
 	
-	else
-	{listModel.addElement(newElement);
-	}
 
 }
 
@@ -159,8 +155,6 @@ public void EditItem() {
 	PlayerCommand a = commandList.getSelectedValue();
 	a.editCommand();
 	listModel.setElementAt(a, selectedIndex);
-	
-	
 }
 
 /**
@@ -169,19 +163,44 @@ public void EditItem() {
  * do nothing.
  */
 public void moveUp() {
-	// Get the index of the selected element
-	int selectedIndex = commandList.getSelectedIndex();
+	boolean cons = false;
+	int[] selectedIndexs = commandList.getSelectedIndices();
+	int len= selectedIndexs.length;
 
-	// Do not move the top element "up"!
-	if (selectedIndex == 0) {
+	// To check if selected items are consective
+	for(int i=0 ; i<len-1; i++)
+	{
+	if (selectedIndexs[i] + 1 != selectedIndexs[i + 1])
+		{
+			cons= false;
+		}
+	else
+		cons=true;
+	}
+	if(selectedIndexs[0]==0)
+	{
 		return;
 	}
+	else if(len==1)
+	{
+		swapElements(selectedIndexs[0], selectedIndexs[0] - 1);
 
-	// Swap the element with the one above it
-	swapElements(selectedIndex, selectedIndex - 1);
+		// Update the highlight position
+		commandList.setSelectedIndex(selectedIndexs[0]-1);
+	}
+	else if(len>1 && cons==true)
+	{
+		for(int i=0 ; i<len; i++)
+		{
+			swapElements(selectedIndexs[i], selectedIndexs[i] - 1);
+			
+		}
+		// Update the highlight position
+		int start= selectedIndexs[0]-1;
+		int end= selectedIndexs[selectedIndexs.length-1]-1;
+		commandList.getSelectionModel().setSelectionInterval(start, end);
+	}
 
-	// Update the highlight position
-	commandList.setSelectedIndex(selectedIndex - 1);
 }
 
 /**
@@ -191,18 +210,47 @@ public void moveUp() {
  */
 public void moveDown() {
 	// Get the index of the selected element
-	int selectedIndex = commandList.getSelectedIndex();
+	boolean cons = false;
+	int[] selectedIndexs = commandList.getSelectedIndices();
+	int len= selectedIndexs.length;
 
+	// To check if selected items are consective
+	for(int i=0 ; i<len-1; i++)
+	{
+	if (selectedIndexs[i] + 1 != selectedIndexs[i + 1])
+		{
+			cons= false;
+		}
+	else
+		cons=true;
+	}
 	// Do not move the bottom "down"!
-	if (selectedIndex == listModel.size() - 1) {
+	
+	if (selectedIndexs[0] == listModel.size() - 1) {
 		return;
 	}
+	
+	else if(len==1)
+	{
+		swapElements(selectedIndexs[0], selectedIndexs[0] + 1);
 
-	// Swap the element with the one below it
-	swapElements(selectedIndex, selectedIndex + 1);
+		// Update the highlight position
+		commandList.setSelectedIndex(selectedIndexs[0]+1);
+	}
+	else if(len>1 && cons==true)
+	{
+		for(int i=len-1 ; i>=0; i--)
+		{
+			swapElements(selectedIndexs[i], selectedIndexs[i] +1);
+			
+		}
+		// Update the highlight position
+		int start= selectedIndexs[0]+1;
+		int end= selectedIndexs[selectedIndexs.length-1]+1;
+		commandList.getSelectionModel().setSelectionInterval(start, end);
+	}
 
-	// Update the highlight position
-	commandList.setSelectedIndex(selectedIndex + 1);
+	
 }
 
 /**
@@ -210,17 +258,23 @@ public void moveDown() {
  */
 public void deleteItem() {
 	// Get the index of the selected element
-	int selectedIndex = commandList.getSelectedIndex();
+	int[] selectedIndex = commandList.getSelectedIndices();
 	
-	System.out.println(selectedIndex);
-/*	if(!(commandList.isSelectionEmpty()))
-	{
-		gui.getRightPanel().setDelete(true);
-	}
-	gui.getRightPanel().setDelete(true);*/
 	
 	// Remove that position from the listModel
-	listModel.remove(selectedIndex);
+	
+	
+	  int index = commandList.getSelectedIndices().length - 1;
+
+       while (commandList.getSelectedIndices().length != 0) {
+           this.listModel.removeElementAt(commandList.getSelectedIndices()[index--]);
+       }
+	
+	/*for(int i=0; i< selectedIndex.length; i++ )
+	{
+	System.out.println(selectedIndex[i]);
+	listModel.remove(selectedIndex[i]);
+	}*/
 }
 
 /**
